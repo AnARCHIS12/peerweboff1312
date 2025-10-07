@@ -1,28 +1,47 @@
-console.log('[PeerWeb SW] Service worker loading...');
+/// <reference path="./types.d.ts" />
+// @ts-check
 
+// Service Worker Version
+const SW_VERSION = 'v1.0.0';
+const CACHE_NAME = `peerweb-cache-${SW_VERSION}`;
+
+console.log(`[PeerWeb SW] Service worker loading... Version: ${SW_VERSION}`);
+
+// Clean up old caches on activation
+const cleanupOldCaches = async () => {
+    const cacheNames = await caches.keys();
+    const oldCaches = cacheNames.filter((name) => name.startsWith('peerweb-cache-') && name !== CACHE_NAME);
+    await Promise.all(oldCaches.map((cache) => caches.delete(cache)));
+    console.log(`[PeerWeb SW] Cleaned up ${oldCaches.length} old cache(s)`);
+};
+
+/** @type {string | null} */
 let currentSiteHash = null;
+/** @type {Set<string>} */
 let currentSiteFiles = new Set();
+/** @type {Map<string, any>} */
 const pendingRequests = new Map();
+/** @type {Map<string, {data: Uint8Array, contentType: string, length: number}>} */
 const mediaCache = new Map(); // Cache for media files
 
 // Listen for messages from main thread
 self.addEventListener('message', (event) => {
     const { type, ...data } = event.data;
-    
+
     console.log('[PeerWeb SW] Received message:', type, data);
-    
+
     switch (type) {
         case 'SKIP_WAITING':
-            self.skipWaiting();
+            /** @type {ServiceWorkerGlobalScope} */ (/** @type {unknown} */ (self)).skipWaiting();
             break;
-            
+
         case 'SITE_LOADING':
             currentSiteHash = data.hash;
             currentSiteFiles.clear();
             mediaCache.clear(); // Clear media cache when loading new site
             console.log('[PeerWeb SW] Site loading:', currentSiteHash);
             break;
-            
+
         case 'SITE_READY':
             currentSiteHash = data.hash;
             if (data.fileList) {
@@ -31,7 +50,7 @@ self.addEventListener('message', (event) => {
             }
             console.log('[PeerWeb SW] Site ready:', currentSiteHash, 'Files:', data.fileCount);
             break;
-            
+
         case 'SITE_UNLOADED':
             currentSiteHash = null;
             currentSiteFiles.clear();
@@ -39,11 +58,11 @@ self.addEventListener('message', (event) => {
             pendingRequests.clear();
             console.log('[PeerWeb SW] Site unloaded');
             break;
-            
+
         case 'RESOURCE_RESPONSE':
             handleResourceResponse(data);
             break;
-            
+
         case 'MEDIA_CHUNK_RESPONSE':
             handleMediaChunkResponse(data);
             break;
@@ -52,19 +71,26 @@ self.addEventListener('message', (event) => {
 
 function handleResourceResponse(data) {
     const { requestId, url, data: fileData, contentType } = data;
-    
-    console.log('[PeerWeb SW] Resource response:', requestId, url, contentType, fileData ? `${fileData.length} bytes` : 'NO DATA');
-    
+
+    console.log(
+        '[PeerWeb SW] Resource response:',
+        requestId,
+        url,
+        contentType,
+        fileData ? `${fileData.length} bytes` : 'NO DATA'
+    );
+
     const pendingRequest = pendingRequests.get(requestId);
     if (pendingRequest) {
         pendingRequests.delete(requestId);
-        
+
         if (fileData && fileData.length > 0) {
             // Convert array back to Uint8Array
             const uint8Array = new Uint8Array(fileData);
-            
+
             // Check if this is a media file
-            if (isMediaFile(contentType) && uint8Array.length > 1024 * 100) { // > 100KB
+            if (isMediaFile(contentType) && uint8Array.length > 1024 * 100) {
+                // > 100KB
                 // Cache media file for range requests
                 mediaCache.set(url, {
                     data: uint8Array,
@@ -73,7 +99,7 @@ function handleResourceResponse(data) {
                 });
                 console.log('[PeerWeb SW] Cached media file:', url, uint8Array.length, 'bytes');
             }
-            
+
             const response = createMediaResponse(uint8Array, contentType, pendingRequest.range);
             console.log('[PeerWeb SW] Serving file:', uint8Array.length, 'bytes');
             pendingRequest.resolve(response);
@@ -95,12 +121,12 @@ function handleResourceResponse(data) {
 }
 
 function handleMediaChunkResponse(data) {
-    const { requestId, url, chunk, start, end, total } = data;
-    
+    const { requestId, chunk, start, end, total } = data;
+
     const pendingRequest = pendingRequests.get(requestId);
     if (pendingRequest) {
         pendingRequests.delete(requestId);
-        
+
         if (chunk && chunk.length > 0) {
             const uint8Array = new Uint8Array(chunk);
             const response = new Response(uint8Array, {
@@ -114,7 +140,7 @@ function handleMediaChunkResponse(data) {
                     'Cache-Control': 'public, max-age=31536000'
                 }
             });
-            
+
             console.log('[PeerWeb SW] Serving media chunk:', start, '-', end, '/', total);
             pendingRequest.resolve(response);
         } else {
@@ -124,10 +150,10 @@ function handleMediaChunkResponse(data) {
 }
 
 function isMediaFile(contentType) {
-    if (!contentType) return false;
-    return contentType.startsWith('video/') || 
-           contentType.startsWith('audio/') || 
-           contentType === 'image/gif';
+    if (!contentType) {
+        return false;
+    }
+    return contentType.startsWith('video/') || contentType.startsWith('audio/') || contentType === 'image/gif';
 }
 
 function createMediaResponse(uint8Array, contentType, range) {
@@ -145,12 +171,12 @@ function createMediaResponse(uint8Array, contentType, range) {
             }
         });
     }
-    
+
     // Handle range request for media files
     const { start, end } = range;
     const chunkSize = end - start + 1;
     const chunk = uint8Array.slice(start, end + 1);
-    
+
     return new Response(chunk, {
         status: 206,
         statusText: 'Partial Content',
@@ -169,17 +195,17 @@ function parseRangeHeader(rangeHeader, fileSize) {
     if (!rangeHeader || !rangeHeader.startsWith('bytes=')) {
         return null;
     }
-    
+
     const range = rangeHeader.substring(6);
     const parts = range.split('-');
-    
+
     let start = parseInt(parts[0]) || 0;
     let end = parseInt(parts[1]) || fileSize - 1;
-    
+
     // Ensure valid range
     start = Math.max(0, Math.min(start, fileSize - 1));
     end = Math.max(start, Math.min(end, fileSize - 1));
-    
+
     return { start, end };
 }
 
@@ -187,18 +213,18 @@ function parseRangeHeader(rangeHeader, fileSize) {
 function isExternalUrl(url) {
     try {
         const urlObj = new URL(url);
-        
+
         // Check for external protocols
         if (urlObj.protocol === 'http:' || urlObj.protocol === 'https:') {
             // If it has a different origin than the current request, it's external
             return urlObj.origin !== self.location.origin;
         }
-        
+
         // Other protocols (mailto:, tel:, etc.) are external
         if (urlObj.protocol !== 'blob:' && urlObj.protocol !== 'data:') {
             return true;
         }
-        
+
         return false;
     } catch (e) {
         // If URL parsing fails, assume it's a relative URL (internal)
@@ -210,86 +236,112 @@ function isExternalUrl(url) {
 function isPeerWebInternalResource(url) {
     try {
         const urlObj = new URL(url);
-        
-        // Only handle PeerWeb site paths
-        if (!urlObj.pathname.startsWith('/peerweb-site/')) {
-            return false;
-        }
-        
-        // Check if this is for the current site
-        const pathParts = urlObj.pathname.split('/').filter(part => part.length > 0);
-        if (pathParts.length >= 2 && pathParts[0] === 'peerweb-site') {
-            const hash = pathParts[1];
-            return hash === currentSiteHash;
-        }
-        
-        return false;
+
+        // Only handle PeerWeb site paths - intercept all /peerweb-site/ URLs
+        // We'll check the hash later in handlePeerWebRequest
+        return urlObj.pathname.startsWith('/peerweb-site/');
     } catch (e) {
         return false;
     }
 }
 
 // Intercept fetch requests
+/**
+ * @param {FetchEvent} event
+ */
 self.addEventListener('fetch', (event) => {
     const url = new URL(event.request.url);
-    
+
     console.log('[PeerWeb SW] Fetch request:', url.href);
-    
+
     // Let external URLs pass through without interception
     if (isExternalUrl(event.request.url)) {
         console.log('[PeerWeb SW] External URL, passing through:', event.request.url);
         return; // Don't call event.respondWith(), let it pass through normally
     }
-    
+
     // Only handle PeerWeb internal resources
     if (isPeerWebInternalResource(event.request.url)) {
         console.log('[PeerWeb SW] Intercepting PeerWeb internal resource:', url.pathname);
         event.respondWith(handlePeerWebRequest(event.request));
         return;
     }
-    
+
     // Let all other requests pass through normally
     console.log('[PeerWeb SW] Non-PeerWeb request, passing through:', event.request.url);
 });
 
 async function handlePeerWebRequest(request) {
     const url = new URL(request.url);
-    const pathParts = url.pathname.split('/').filter(part => part.length > 0);
-    
+    const pathParts = url.pathname.split('/').filter((part) => part.length > 0);
+
     console.log('[PeerWeb SW] Path parts:', pathParts);
-    
+
     // URL format: /peerweb-site/{hash}/{file-path}
     if (pathParts.length < 2 || pathParts[0] !== 'peerweb-site') {
         console.log('[PeerWeb SW] Invalid PeerWeb URL format');
         return new Response('Invalid PeerWeb URL', { status: 400 });
     }
-    
+
     const hash = pathParts[1];
     let filePath = pathParts.slice(2).join('/');
-    
+
     console.log('[PeerWeb SW] Requesting file:', filePath, 'for hash:', hash);
     console.log('[PeerWeb SW] Current site hash:', currentSiteHash);
-    
+
+    // If site is not loaded yet, wait for it
+    if (!currentSiteHash) {
+        console.log('[PeerWeb SW] Site not ready yet, waiting...');
+        
+        // Dynamic wait time: start with 30 seconds, can be extended
+        // We give more time for larger sites to initialize
+        const baseWait = 30000; // 30 seconds base
+        const maxWait = 120000; // Maximum 2 minutes
+        
+        const startTime = Date.now();
+        let waitTime = baseWait;
+        
+        while (!currentSiteHash && (Date.now() - startTime) < maxWait) {
+            await new Promise(resolve => setTimeout(resolve, 100)); // Wait 100ms
+            
+            // Log progress every 5 seconds
+            const elapsed = Date.now() - startTime;
+            if (elapsed % 5000 < 100) {
+                console.log(`[PeerWeb SW] Still waiting for site... (${(elapsed / 1000).toFixed(0)}s elapsed)`);
+            }
+        }
+        
+        if (!currentSiteHash) {
+            console.log('[PeerWeb SW] Timeout waiting for site to load');
+            return new Response('Site not loaded - timeout. The site may be too large or downloading slowly.', {
+                status: 503,
+                headers: { 'Content-Type': 'text/plain' }
+            });
+        }
+        
+        console.log('[PeerWeb SW] Site now ready:', currentSiteHash);
+    }
+
     // Check if this is the current site
     if (hash !== currentSiteHash) {
-        console.log('[PeerWeb SW] Hash mismatch - site not loaded');
-        return new Response(`Site not loaded. Expected: ${currentSiteHash}, Got: ${hash}`, { 
+        console.log('[PeerWeb SW] Hash mismatch - wrong site');
+        return new Response(`Wrong site loaded. Expected: ${currentSiteHash}, Got: ${hash}`, {
             status: 404,
             headers: { 'Content-Type': 'text/plain' }
         });
     }
-    
+
     // Handle different navigation scenarios
     filePath = normalizeFilePath(filePath, url);
-    
+
     console.log('[PeerWeb SW] Normalized file path:', filePath);
-    
+
     // Check if this is a cached media file and handle range requests
     const cachedMedia = mediaCache.get(request.url);
     if (cachedMedia) {
         console.log('[PeerWeb SW] Found cached media file');
         const rangeHeader = request.headers.get('Range');
-        
+
         if (rangeHeader) {
             console.log('[PeerWeb SW] Range request for media:', rangeHeader);
             const range = parseRangeHeader(rangeHeader, cachedMedia.length);
@@ -297,19 +349,19 @@ async function handlePeerWebRequest(request) {
                 return createMediaResponse(cachedMedia.data, cachedMedia.contentType, range);
             }
         }
-        
+
         // Return full media file if no range requested
         return createMediaResponse(cachedMedia.data, cachedMedia.contentType, null);
     }
-    
+
     // Parse range header for new requests
     const rangeHeader = request.headers.get('Range');
-    let range = null;
+    const range = null;
     if (rangeHeader) {
         console.log('[PeerWeb SW] Range request detected:', rangeHeader);
         // We'll need the file size first, so we'll handle this in the response
     }
-    
+
     // Request the resource from main thread
     return requestResourceFromMainThread(request.url, filePath, range);
 }
@@ -320,86 +372,107 @@ function normalizeFilePath(filePath, url) {
         console.log('[PeerWeb SW] Empty path, defaulting to index.html');
         return 'index.html';
     }
-    
+
     // If path ends with /, append index.html
     if (filePath.endsWith('/')) {
         console.log('[PeerWeb SW] Directory path, appending index.html');
         return filePath + 'index.html';
     }
-    
+
     // If path has no extension and doesn't exist as-is, try common variations
     if (!filePath.includes('.')) {
         console.log('[PeerWeb SW] Path without extension, trying variations');
-        
+
         // Try as directory first
         const dirPath = filePath + '/index.html';
         if (currentSiteFiles.has(dirPath)) {
             console.log('[PeerWeb SW] Found as directory:', dirPath);
             return dirPath;
         }
-        
+
         // Try with .html extension
         const htmlPath = filePath + '.html';
         if (currentSiteFiles.has(htmlPath)) {
             console.log('[PeerWeb SW] Found with .html extension:', htmlPath);
             return htmlPath;
         }
-        
+
         // Try as index in subdirectory
         const indexPath = filePath + '/index.html';
         console.log('[PeerWeb SW] Trying as subdirectory index:', indexPath);
         return indexPath;
     }
-    
+
     // Handle query parameters and fragments - remove them for file lookup
     if (url.search || url.hash) {
         console.log('[PeerWeb SW] Removing query/fragment from path');
         const cleanPath = filePath.split('?')[0].split('#')[0];
         return cleanPath;
     }
-    
+
     return filePath;
 }
 
 async function requestResourceFromMainThread(requestUrl, filePath, range) {
     const requestId = 'req_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
-    
+
     console.log('[PeerWeb SW] Creating request:', requestId, 'for file:', filePath);
-    
+
     return new Promise((resolve) => {
         // Store the resolve function with range info
-        pendingRequests.set(requestId, { 
-            resolve, 
+        pendingRequests.set(requestId, {
+            resolve,
             timestamp: Date.now(),
-            range: range 
+            range: range
         });
-        
+
         console.log('[PeerWeb SW] Stored pending request:', requestId);
-        
-        // Request the resource
-        self.clients.matchAll().then(clients => {
-            console.log('[PeerWeb SW] Found clients:', clients.length);
-            
-            if (clients.length > 0) {
-                clients[0].postMessage({
-                    type: 'RESOURCE_REQUEST',
-                    url: requestUrl,
-                    filePath: filePath,
-                    requestId: requestId,
-                    range: range
+
+        // Request the resource from the main PeerWeb page (not iframe)
+        /** @type {ServiceWorkerGlobalScope} */ (/** @type {unknown} */ (self)).clients
+            .matchAll({ type: 'window' })
+            .then((clients) => {
+                console.log('[PeerWeb SW] Found clients:', clients.length);
+
+                // Filter to find the main PeerWeb page (not an iframe with /peerweb-site/ in URL)
+                const mainClients = clients.filter(client => {
+                    return client.url && !client.url.includes('/peerweb-site/');
                 });
-                console.log('[PeerWeb SW] Sent request to client for:', filePath);
-            } else {
-                console.log('[PeerWeb SW] No clients found');
+                
+                console.log('[PeerWeb SW] Main (non-iframe) clients:', mainClients.length);
+
+                if (mainClients.length > 0) {
+                    // Send to the main PeerWeb page
+                    mainClients[0].postMessage({
+                        type: 'RESOURCE_REQUEST',
+                        url: requestUrl,
+                        filePath: filePath,
+                        requestId: requestId,
+                        range: range
+                    });
+                    console.log('[PeerWeb SW] Sent request to main client for:', filePath);
+                } else if (clients.length > 0) {
+                    // Fallback: try any client
+                    console.log('[PeerWeb SW] No main client found, trying first available client');
+                    clients[0].postMessage({
+                        type: 'RESOURCE_REQUEST',
+                        url: requestUrl,
+                        filePath: filePath,
+                        requestId: requestId,
+                        range: range
+                    });
+                } else {
+                    console.log('[PeerWeb SW] No clients found');
+                    pendingRequests.delete(requestId);
+                    resolve(createNavigationFallback(filePath));
+                }
+            })
+            .catch((error) => {
+                console.error('[PeerWeb SW] Error getting clients:', error);
                 pendingRequests.delete(requestId);
                 resolve(createNavigationFallback(filePath));
-            }
-        }).catch(error => {
-            console.error('[PeerWeb SW] Error getting clients:', error);
-            pendingRequests.delete(requestId);
-            resolve(createNavigationFallback(filePath));
-        });
-        
+            });
+
         // Timeout after 10 seconds for media files, 5 for others
         const timeout = isMediaFile(filePath) ? 10000 : 5000;
         setTimeout(() => {
@@ -414,7 +487,7 @@ async function requestResourceFromMainThread(requestUrl, filePath, range) {
 
 function createNavigationFallback(filePath) {
     console.log('[PeerWeb SW] Creating navigation fallback for:', filePath);
-    
+
     // For media files, return a more specific error
     if (isMediaFile(filePath)) {
         return new Response('Media file not available', {
@@ -426,7 +499,7 @@ function createNavigationFallback(filePath) {
             }
         });
     }
-    
+
     // Create a simple fallback page that tries to redirect to index.html
     const fallbackHtml = `
     <!DOCTYPE html>
@@ -505,7 +578,7 @@ function createNavigationFallback(filePath) {
     </body>
     </html>
     `;
-    
+
     return new Response(fallbackHtml, {
         status: 200,
         statusText: 'OK',
@@ -517,16 +590,25 @@ function createNavigationFallback(filePath) {
 }
 
 // Service worker installation
-self.addEventListener('install', (event) => {
+/**
+ * @param {ExtendableEvent} _event
+ */
+self.addEventListener('install', (_event) => {
     console.log('[PeerWeb SW] Installing...');
-    self.skipWaiting();
+    /** @type {ServiceWorkerGlobalScope} */ (/** @type {unknown} */ (self)).skipWaiting();
 });
 
+/**
+ * @param {ExtendableEvent} event
+ */
 self.addEventListener('activate', (event) => {
     console.log('[PeerWeb SW] Activating...');
     event.waitUntil(
-        self.clients.claim().then(() => {
-            console.log('[PeerWeb SW] Claimed all clients');
+        Promise.all([
+            /** @type {ServiceWorkerGlobalScope} */ (/** @type {unknown} */ (self)).clients.claim(),
+            cleanupOldCaches()
+        ]).then(() => {
+            console.log('[PeerWeb SW] Claimed all clients and cleaned up old caches');
         })
     );
 });

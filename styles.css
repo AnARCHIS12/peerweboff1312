@@ -31,7 +31,7 @@ body {
     color: #ddd;
 }
 
-#create-torrent{
+#create-torrent {
     display: none;
 }
 
@@ -62,13 +62,15 @@ h3 {
     color: #4a5568;
 }
 
-.steps, .req-list {
+.steps,
+.req-list {
     display: flex;
     flex-direction: column;
     gap: 1rem;
 }
 
-.step, .req {
+.step,
+.req {
     padding: 1rem;
     background: #f7fafc;
     border-radius: 10px;
@@ -85,14 +87,16 @@ h3 {
     margin: 1rem 0;
 }
 
-.feature-grid, .benefit-grid {
+.feature-grid,
+.benefit-grid {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
     gap: 1rem;
     margin-top: 1rem;
 }
 
-.feature, .benefit {
+.feature,
+.benefit {
     padding: 1rem;
     background: #edf2f7;
     border-radius: 8px;
@@ -267,8 +271,12 @@ h3 {
 }
 
 @keyframes spin {
-    0% { transform: rotate(0deg); }
-    100% { transform: rotate(360deg); }
+    0% {
+        transform: rotate(0deg);
+    }
+    100% {
+        transform: rotate(360deg);
+    }
 }
 
 .peer-stats {
@@ -310,7 +318,7 @@ h3 {
     border: none;
 }
 
-.demo-link{
+.demo-link {
     font-size: inherit;
 }
 
@@ -403,28 +411,29 @@ footer {
     .hero h1 {
         font-size: 2rem;
     }
-    
+
     .hero h2 {
         font-size: 1.2rem;
     }
-    
+
     .container {
         margin: 1rem;
         padding: 1rem;
     }
-    
-    .feature-grid, .benefit-grid {
+
+    .feature-grid,
+    .benefit-grid {
         grid-template-columns: 1fr;
     }
-    
+
     .hash-input-group {
         flex-direction: column;
     }
-    
+
     .hash-input {
         min-width: auto;
     }
-    
+
     .debug-panel {
         width: calc(100% - 40px);
         bottom: 10px;
@@ -560,11 +569,11 @@ footer {
         flex-direction: column;
         align-items: center;
     }
-    
+
     .torrent-stats {
         grid-template-columns: 1fr;
     }
-    
+
     .hash-display,
     .url-display {
         font-size: 0.75rem;
@@ -577,8 +586,14 @@ footer {
 }
 
 @keyframes fadeIn {
-    from { opacity: 0; transform: translateY(-10px); }
-    to { opacity: 1; transform: translateY(0); }
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
 }
 
 /* Improved progress bars */
@@ -593,13 +608,24 @@ footer {
 }
 
 /* File type icons */
-.file-icon.html { color: #e34c26; }
-.file-icon.css { color: #1572b6; }
-.file-icon.js { color: #f7df1e; }
-.file-icon.image { color: #ff6b6b; }
-.file-icon.font { color: #4ecdc4; }
-.file-icon.other { color: #95a5a6; }
-
+.file-icon.html {
+    color: #e34c26;
+}
+.file-icon.css {
+    color: #1572b6;
+}
+.file-icon.js {
+    color: #f7df1e;
+}
+.file-icon.image {
+    color: #ff6b6b;
+}
+.file-icon.font {
+    color: #4ecdc4;
+}
+.file-icon.other {
+    color: #95a5a6;
+}
 
 /* Quick Upload Section */
 .quick-upload {
@@ -756,14 +782,25 @@ footer {
 
 /* Animations */
 @keyframes float {
-    0%, 100% { transform: translateY(0px); }
-    50% { transform: translateY(-10px); }
+    0%,
+    100% {
+        transform: translateY(0px);
+    }
+    50% {
+        transform: translateY(-10px);
+    }
 }
 
 @keyframes pulse {
-    0% { transform: scale(1); }
-    50% { transform: scale(1.05); }
-    100% { transform: scale(1); }
+    0% {
+        transform: scale(1);
+    }
+    50% {
+        transform: scale(1.05);
+    }
+    100% {
+        transform: scale(1);
+    }
 }
 
 .drop-zone.drag-over {
@@ -805,34 +842,34 @@ footer {
     .drop-zone {
         padding: 2rem 1rem;
     }
-    
+
     .drop-buttons {
         flex-direction: column;
         align-items: center;
     }
-    
+
     .result-actions {
         flex-direction: column;
         align-items: center;
     }
-    
+
     .desktop-clients {
         flex-direction: column;
         align-items: center;
     }
-    
+
     .result-info code {
         font-size: 0.75rem;
     }
-    
+
     .drop-icon {
         font-size: 3rem;
     }
-    
+
     .drop-content h4 {
         font-size: 1.25rem;
     }
-    
+
     .quick-upload {
         padding: 1.5rem;
     }
@@ -866,9 +903,19 @@ footer {
 
 /* Success animation */
 @keyframes success-bounce {
-    0%, 20%, 50%, 80%, 100% { transform: translateY(0); }
-    40% { transform: translateY(-10px); }
-    60% { transform: translateY(-5px); }
+    0%,
+    20%,
+    50%,
+    80%,
+    100% {
+        transform: translateY(0);
+    }
+    40% {
+        transform: translateY(-10px);
+    }
+    60% {
+        transform: translateY(-5px);
+    }
 }
 
 .result-success h4 {
@@ -883,13 +930,14 @@ footer {
 
 /* File type indicators */
 .drop-zone::before {
-    content: "";
+    content: '';
     position: absolute;
     top: 0;
     left: 0;
     right: 0;
     bottom: 0;
-    background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><circle cx="50" cy="50" r="2" fill="rgba(255,255,255,0.1)"/></svg>') repeat;
+    background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><circle cx="50" cy="50" r="2" fill="rgba(255,255,255,0.1)"/></svg>')
+        repeat;
     pointer-events: none;
     opacity: 0;
     transition: opacity 0.3s ease;

@@ -1,0 +1,56 @@
+{
+  "name": "PeerWeb - Decentralized Website Hosting",
+  "short_name": "PeerWeb",
+  "description": "Host and share websites using WebTorrent technology. Decentralized, censorship-resistant, and always available.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#504ba2",
+  "theme_color": "#66d4ea",
+  "orientation": "any",
+  "scope": "/",
+  "icons": [
+    {
+      "src": "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='0.9em' font-size='90'>🪐</text></svg>",
+      "sizes": "192x192",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='0.9em' font-size='90'>🪐</text></svg>",
+      "sizes": "512x512",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ],
+  "categories": ["utilities", "productivity", "social"],
+  "screenshots": [],
+  "shortcuts": [
+    {
+      "name": "Upload Website",
+      "short_name": "Upload",
+      "description": "Upload a new website to PeerWeb",
+      "url": "/#upload",
+      "icons": []
+    },
+    {
+      "name": "Load Site",
+      "short_name": "Load",
+      "description": "Load an existing PeerWeb site",
+      "url": "/#load",
+      "icons": []
+    }
+  ],
+  "share_target": {
+    "action": "/share",
+    "method": "POST",
+    "enctype": "multipart/form-data",
+    "params": {
+      "files": [
+        {
+          "name": "files",
+          "accept": ["text/html", ".torrent", "application/x-bittorrent"]
+        }
+      ]
+    }
+  }
+}

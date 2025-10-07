@@ -1,7 +1,6 @@
-# 🪐 PeerWeb 🪐 
+# 🪐 PeerWeb 🪐
 
-
-**🌏 Decentralized website hosting powered by WebTorrent 🌏** 
+**🌏 Decentralized website hosting powered by WebTorrent 🌏**
 
 [PeerWeb](https://peerweb.lol) enables truly decentralized, censorship-resistant website hosting through peer-to-peer networks. Upload your static websites and share them globally without relying on centralized servers or paying hosting fees.
 
@@ -14,16 +13,16 @@
 - **Functionality Demo with local resources** - [https://peerweb.lol/?orc=90c020bd252639622a14895a0fad713b91e0130c](https://peerweb.lol/?orc=90c020bd252639622a14895a0fad713b91e0130c)
 
 - **SomaFM on PeerWeb** - [https://peerweb.lol/?orc=908d19242ae1461f333a516d1f8b89c13ef2d259](https://peerweb.lol/?orc=908d19242ae1461f333a516d1f8b89c13ef2d259)
-  
-- **Chess on PeerWeb** - [https://peerweb.lol/?orc=525bad84c4637cc49b47e3b9a5e3e9bd6a6dc398](https://peerweb.lol/?orc=525bad84c4637cc49b47e3b9a5e3e9bd6a6dc398) 
+- **Chess on PeerWeb** - [https://peerweb.lol/?orc=525bad84c4637cc49b47e3b9a5e3e9bd6a6dc398](https://peerweb.lol/?orc=525bad84c4637cc49b47e3b9a5e3e9bd6a6dc398)
 
 - **Text Editor app on PeerWeb** - [https://peerweb.lol/?orc=4e5f1204dcec68195bfcc89f9410a0b70a0ddfac](https://peerweb.lol/?orc=4e5f1204dcec68195bfcc89f9410a0b70a0ddfac)
 
-- **Markdown Editor on PeerWeb** - [https://peerweb.lol/?orc=59587ae54c2cc2cf1b0419728ab5625fd7c54fdf](https://peerweb.lol/?orc=59587ae54c2cc2cf1b0419728ab5625fd7c54fdf) 
+- **Markdown Editor on PeerWeb** - [https://peerweb.lol/?orc=59587ae54c2cc2cf1b0419728ab5625fd7c54fdf](https://peerweb.lol/?orc=59587ae54c2cc2cf1b0419728ab5625fd7c54fdf)
 
 ## ✨ Features
 
 ### 🚀 Core Features
+
 - **Drag & Drop Upload** - Simply drag your website folder
 - **Instant Sharing** - Get a shareable PeerWeb link immediately
 - **Zero Hosting Costs** - No servers, no monthly fees, completely free
@@ -31,38 +30,49 @@
 - **Always Available** - Works as long as there are online peers
 
 ### 💾 Smart Technology
+
 - **Intelligent Caching** - Lightning-fast loading with IndexedDB storage
 - **Service Worker Magic** - Seamless resource loading and offline support
 - **Progress Tracking** - Real-time download progress and peer statistics
 - **Auto Cleanup** - Expired cache automatically cleaned after 7 days
 
 ### 🛡️ Security & Safety
+
 - **XSS Protection** - All HTML sanitized with DOMPurify
+- **Hash Sanitization** - Torrent hashes sanitized to prevent XSS attacks
 - **Sandboxed Execution** - Sites run in isolated iframe environments
 - **Content Validation** - All resources validated before display
 - **External Link Preservation** - Social media and external links work normally
+- **Memory Leak Prevention** - Automatic cleanup of timeouts and object URLs
 
 ### 🎯 User Experience
+
+- **Toast Notifications** - Non-blocking, user-friendly notifications
 - **Quick Upload Interface** - Prominent drag-and-drop area
 - **Advanced Torrent Creator** - Full-featured torrent creation tools
 - **Debug Mode** - Detailed logging for developers and troubleshooting
+- **PWA Support** - Install as a Progressive Web App on any device
 - **Mobile Friendly** - Responsive design works on all devices
 
 ## 🚀 Quick Start
 
 ### 1. Host a Website
+
 1. Open [PeerWeb.lol](https://peerweb.lol) in your browser
 2. Drag your website folder to the upload area
 3. Get your unique PeerWeb URL, and keep the tab open
 4. Share the link with anyone, anywhere!
 
 ### 2. Load a Website
+
 1. Enter a torrent hash in the load field
 2. Or use a PeerWeb URL: `https://peerweb.lol?orc=HASH`
 3. Website loads directly from the peer network
 
 ### 3. Debug & Develop
+
 Add `&debug=true` to any PeerWeb URL for detailed logging:
+
 ```
 https://peerweb.lol?orc=ABC123...&debug=true
 ```
@@ -70,6 +80,7 @@ https://peerweb.lol?orc=ABC123...&debug=true
 ## 📋 Website Requirements
 
 Your websites should be:
+
 - ✅ **Static content only** (HTML, CSS, JS, images, fonts, etc.)
 - ✅ **Include index.html** (in root)
 - ✅ **Use relative paths** for all internal resources
@@ -80,10 +91,10 @@ Your websites should be:
 ```
 peerweb/
 ├── index.html          # Main application interface
-├── styles.css          # Application styling
 ├── peerweb.js          # Core PeerWeb functionality
 ├── peerweb.min.js      # Minified version
 ├── peerweb-sw.js       # Service Worker for resource handling
+├── manifest.json       # PWA manifest for installable web app
 └── README.md           # This file
 ```
 
@@ -92,53 +103,83 @@ peerweb/
 ### The Magic Behind PeerWeb
 
 1. **Upload Process**
-   - Your website files are packaged into a BitTorrent torrent
-   - A unique hash identifies your site across the network
-   - Files are seeded from your browser to the peer network
+    - Your website files are packaged into a BitTorrent torrent
+    - A unique hash identifies your site across the network
+    - Files are seeded from your browser to the peer network
 
 2. **Loading Process**
-   - Service Worker intercepts resource requests
-   - Files are downloaded via WebTorrent from multiple peers
-   - Content is cached locally for instant future access
+    - Service Worker intercepts resource requests
+    - Files are downloaded via WebTorrent from multiple peers
+    - Content is cached locally for instant future access
 
 3. **Security Layer**
-   - All HTML content sanitized with DOMPurify
-   - Sites run in sandboxed iframe
-   - External links preserved and functional
+    - All HTML content sanitized with DOMPurify
+    - Torrent hashes sanitized to prevent XSS
+    - Sites run in sandboxed iframe
+    - External links preserved and functional
+    - Automatic memory cleanup on page unload
 
 ## 🚀 Advanced Usage
 
 ### Debug Mode
+
 Enable detailed logging by adding `&debug=true` to any URL:
+
 ```javascript
 // Example debug output
-[PeerWeb] Loading site with hash: abc123...
-[PeerWeb] Found 15 files in torrent
-[PeerWeb] Processing site early (95% complete)
+[PeerWeb:DEBUG] Loading site with hash: abc123...
+[PeerWeb:INFO] Found 15 files in torrent
+[PeerWeb:DEBUG] Processing site early (95% complete)
 [PeerWeb SW] Serving file: styles.css (2.4KB)
 ```
+
+### Production vs Development
+
+PeerWeb automatically detects the environment:
+
+- **Production** (peerweb.lol): Only shows warnings and errors
+- **Development** (localhost): Shows all debug information
+
+### Progressive Web App
+
+Install PeerWeb on any device:
+
+1. Visit [PeerWeb.lol](https://peerweb.lol)
+2. Look for "Install" or "Add to Home Screen" in your browser
+3. Use PeerWeb like a native application
+
+Features when installed:
+
+- Standalone app window
+- App icon on home screen/desktop
+- Faster loading with caching
+- Offline access to cached sites
 
 ## 🤝 Contributing
 
 We welcome contributions! Here's how you can help:
 
 ### 🐛 Report Bugs
+
 - Use the [Issues](https://github.com/Omodaka9375/peerweb/issues) tab
 - Include browser version, steps to reproduce, and error messages
 - Enable debug mode for detailed logs
 
 ### 💡 Suggest Features
+
 - Open a [Feature Request](https://github.com/Omodaka9375/peerweb/issues/new)
 - Describe the use case and expected behavior
 - Check existing issues to avoid duplicates
 
 ### 🔧 Submit Code
+
 1. Fork the repository
 2. Create a feature branch: `git checkout -b feature-name`
 3. Make your changes and test thoroughly
 4. Submit a Pull Request with detailed description
 
 ### 📝 Improve Documentation
+
 - Fix typos or unclear instructions
 - Add examples and use cases
 - Translate to other languages
@@ -146,6 +187,7 @@ We welcome contributions! Here's how you can help:
 ## 📖 Documentation
 
 ### Browser Support
+
 - ✅ **Chrome/Chromium** 60+ (Recommended)
 - ✅ **Firefox** 55+
 - ✅ **Safari** 11+
@@ -153,11 +195,13 @@ We welcome contributions! Here's how you can help:
 - ❌ Internet Explorer (Not supported)
 
 ### WebTorrent Compatibility
+
 - Uses WebTorrent for browser-based torrenting
 - Compatible with standard BitTorrent protocol
 - Supports DHT, PEX, and WebRTC connections
 
 ### Limitations
+
 - **Static sites only** - No server-side processing
 - **Browser hosting** - Sites available while browser tab is open
 - **Peer dependency** - Requires active peers for availability
@@ -166,18 +210,24 @@ We welcome contributions! Here's how you can help:
 ## 🔒 Security
 
 ### Content Sanitization
-All HTML content is automatically sanitized using DOMPurify to prevent:
-- Cross-site scripting (XSS) attacks
-- Malicious script injection
-- Dangerous HTML elements and attributes
+
+Multi-layer XSS protection:
+
+- **HTML Sanitization** - All HTML content sanitized with DOMPurify
+- **Hash Sanitization** - Torrent hashes stripped of non-hex characters
+- **Script Injection Prevention** - Malicious scripts blocked
+- **Dangerous Elements** - Unsafe HTML elements and attributes removed
 
 ### Sandboxed Execution
+
 Websites run in sandboxed iframes with restrictions:
+
 ```html
-<iframe sandbox="allow-scripts allow-same-origin allow-forms allow-popups allow-modals">
+<iframe sandbox="allow-scripts allow-same-origin allow-forms allow-popups allow-modals"></iframe>
 ```
 
 ### External Resource Handling
+
 - External links (social media, email, etc.) work normally
 - CDN resources and external stylesheets load properly
 - Only internal site resources are processed through PeerWeb
@@ -185,24 +235,28 @@ Websites run in sandboxed iframes with restrictions:
 ## 🌟 Use Cases
 
 ### 📝 Personal Websites
+
 - Portfolio sites
 - Blogs and documentation
 - Landing pages
 - Resume/CV sites
 
 ### 🎨 Creative Projects
+
 - Art galleries
 - Photography portfolios
 - Interactive demos
 - Games and experiments
 
 ### 📚 Educational Content
+
 - Course materials
 - Tutorials and guides
 - Research publications
 - Student projects
 
 ### 🌍 Censorship Resistance
+
 - News and journalism
 - Political content
 - Whistleblowing platforms
@@ -213,12 +267,13 @@ Websites run in sandboxed iframes with restrictions:
 For permanent hosting without keeping browser tabs open:
 
 - 🪟 **Windows** - PeerWeb Desktop (Coming Soon)
-- 🍎 **macOS** - PeerWeb Desktop (Coming Soon)  
+- 🍎 **macOS** - PeerWeb Desktop (Coming Soon)
 - 🐧 **Linux** - PeerWeb Desktop (Coming Soon)
 
 ## 📊 Technical Specifications
 
 ### Supported File Types
+
 - **Documents**: HTML, CSS, JavaScript, JSON, XML
 - **Images**: PNG, JPEG, GIF, SVG, WebP, ICO
 - **Fonts**: WOFF, WOFF2, TTF, OTF, EOT
@@ -226,12 +281,16 @@ For permanent hosting without keeping browser tabs open:
 - **Other**: PDF and various binary formats
 
 ### Performance
+
 - **Caching**: IndexedDB with 7-day expiration
 - **Loading**: Progressive loading with 95% threshold
 - **Piece Size**: Optimized based on total site size
 - **Timeout**: 5-second request timeout with fallbacks
+- **Memory Management**: Automatic cleanup of timeouts and object URLs
+- **Resource Tracking**: All setTimeout calls tracked and cleaned up
 
 ### Network
+
 - **Trackers**: 7+ built-in BitTorrent trackers
 - **Protocols**: WebRTC, WebSocket, HTTP fallback
 - **DHT**: Distributed Hash Table support
@@ -251,6 +310,7 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 ## 📞 Support
 
 ### Getting Help
+
 - 📖 **Documentation**: Check this README and inline code comments
 - 🐛 **Bug Reports**: Use GitHub Issues with debug logs
 - 💬 **Community**: Join discussions in GitHub Discussions
